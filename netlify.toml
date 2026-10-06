@@ -5,3 +5,4 @@
   from = "/"
   to = "/index-2.html"
   status = 200
+  force = true
