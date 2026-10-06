@@ -44,6 +44,9 @@ let currentFaceEffect = 'original';
 let currentColorFilter = 'original';
 let pendingCapture = null;
 let isFlippingCapture = false;
+let isSavingStrip = false;
+let stripShots = [];
+let activeStripLayout = null;
 let faceLandmarker = null;
 let faceLandmarkerPromise = null;
 let faceLandmarks = null;
@@ -99,6 +102,97 @@ const filters = {
   blur: 'blur(2px) saturate(.85) brightness(1.05)'
 };
 const faceEffects = new Set(['cat', 'stretch', 'bigEyes', 'wide', 'bunny']);
+
+function selectedLayout() {
+  return document.querySelector('#layoutSelect').value;
+}
+
+function updateShotProgress() {
+  const layout = activeStripLayout || selectedLayout();
+  const targetCount = layout === 'single' ? 1 : 4;
+  const currentCount = layout === 'single' ? 0 : stripShots.length;
+  document.querySelector('#shotCount').textContent =
+    `${String(currentCount).padStart(2, '0')} / ${String(targetCount).padStart(2, '0')}`;
+
+  const progress = document.querySelector('#stripProgress');
+  const layoutSelect = document.querySelector('#layoutSelect');
+  progress.hidden = stripShots.length === 0;
+  layoutSelect.disabled = stripShots.length > 0;
+  if (stripShots.length) {
+    document.querySelector('#stripProgressText').textContent =
+      `${stripShots.length} of 4 photos saved`;
+  }
+
+  const saveButton = document.querySelector('#saveCapture');
+  if (saveButton) {
+    const nextPhoto = stripShots.length + 1;
+    saveButton.textContent = layout === 'single'
+      ? '↓ Save to gallery'
+      : `↓ Add photo ${String(nextPhoto).padStart(2, '0')} / 04`;
+  }
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
+}
+
+async function composeStrip(shots, layout) {
+  const images = await Promise.all(shots.map((shot) => loadImage(shot.src)));
+  const isGrid = layout === 'grid';
+  const tileWidth = 640;
+  const tileHeight = isGrid ? 640 : 800;
+  const gutter = 18;
+  const padding = 30;
+  const columns = isGrid ? 2 : 1;
+  const rows = isGrid ? 2 : 4;
+  const result = document.createElement('canvas');
+  result.width = padding * 2 + columns * tileWidth + (columns - 1) * gutter;
+  result.height = padding * 2 + rows * tileHeight + (rows - 1) * gutter;
+
+  const context = result.getContext('2d');
+  context.fillStyle = '#f4e7e6';
+  context.fillRect(0, 0, result.width, result.height);
+
+  images.forEach((image, index) => {
+    const column = isGrid ? index % 2 : 0;
+    const row = isGrid ? Math.floor(index / 2) : index;
+    const left = padding + column * (tileWidth + gutter);
+    const top = padding + row * (tileHeight + gutter);
+    const targetRatio = tileWidth / tileHeight;
+    const imageRatio = image.naturalWidth / image.naturalHeight;
+    let sourceX = 0;
+    let sourceY = 0;
+    let sourceWidth = image.naturalWidth;
+    let sourceHeight = image.naturalHeight;
+
+    if (imageRatio > targetRatio) {
+      sourceWidth = image.naturalHeight * targetRatio;
+      sourceX = (image.naturalWidth - sourceWidth) / 2;
+    } else {
+      sourceHeight = image.naturalWidth / targetRatio;
+      sourceY = (image.naturalHeight - sourceHeight) / 2;
+    }
+
+    context.drawImage(
+      image,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      left,
+      top,
+      tileWidth,
+      tileHeight
+    );
+  });
+
+  return result.toDataURL('image/jpeg', 0.9);
+}
 
 let editSource = '';
 let editEffect = 'original';
@@ -342,7 +436,7 @@ function render() {
     ? captures
         .map(
           (capture, index) => `
-            <div class="gallery-item">
+            <div class="gallery-item ${capture.layout === 'classic' ? 'gallery-strip' : ''}">
               <img src="${capture.src}" alt="Capture ${index + 1}">
               <div class="gallery-actions" style="position:absolute;right:8px;top:8px;display:flex;gap:5px">
                 <button data-download="${index}" type="button" title="Simpan gambar" style="position:static;width:28px;height:28px;background:#f5efe7ee;border-radius:50%;font-size:17px;line-height:1">↓</button>
@@ -897,20 +991,27 @@ function take() {
   frame.classList.add('has-photo');
   document.querySelector('.camera-controls').hidden = true;
   document.querySelector('#captureReviewControls').hidden = false;
+  updateShotProgress();
 
   const flash = document.querySelector('#flash');
   flash.classList.remove('active');
   void flash.offsetWidth;
   flash.classList.add('active');
 
-  status.textContent = 'REVIEW PHOTO';
-  toast('Foto siap ditinjau. Retake atau simpan ke galeri.');
+  const layout = activeStripLayout || selectedLayout();
+  const photoNumber = layout === 'single' ? 1 : stripShots.length + 1;
+  status.textContent = `REVIEW ${photoNumber} / ${layout === 'single' ? 1 : 4}`;
+  toast('Foto siap ditinjau. Retake atau simpan.');
 }
 
 function retakeCapture() {
   if (!pendingCapture || isFlippingCapture) return;
 
   pendingCapture = null;
+  resumeAfterReview();
+}
+
+function resumeAfterReview() {
   document.querySelector('#flipCapture').setAttribute('aria-pressed', 'false');
   frame.classList.remove('has-photo');
   preview.removeAttribute('src');
@@ -918,6 +1019,7 @@ function retakeCapture() {
   document.querySelector('#captureReviewControls').hidden = true;
   message.classList.toggle('hidden', Boolean(video.srcObject));
   updateEffectPresentation();
+  updateShotProgress();
 
   if (faceEffects.has(currentFaceEffect) && video.srcObject) {
     ensureFaceLandmarker().then(startFaceTracking).catch(() => {
@@ -972,8 +1074,8 @@ async function toggleCaptureFlip() {
   }
 }
 
-function saveCapture() {
-  if (!pendingCapture || isFlippingCapture) return;
+async function saveCapture() {
+  if (!pendingCapture || isFlippingCapture || isSavingStrip) return;
 
   const savedCapture = {
     src: pendingCapture.src,
@@ -981,26 +1083,74 @@ function saveCapture() {
     colorFilter: pendingCapture.colorFilter,
     flipped: pendingCapture.flipped
   };
-  pendingCapture = null;
-  captures.unshift(savedCapture);
-  captures = captures.slice(0, 12);
-  localStorage.setItem('posed-captures', JSON.stringify(captures));
-  render();
-  document.querySelector('#captureReviewControls').hidden = true;
-  document.querySelector('.camera-controls').hidden = false;
+  const layout = activeStripLayout || selectedLayout();
 
-  if (video.srcObject) {
-    frame.classList.remove('has-photo');
-    preview.removeAttribute('src');
-    if (faceEffects.has(currentFaceEffect)) startFaceTracking();
+  if (layout === 'single') {
+    pendingCapture = null;
+    captures.unshift(savedCapture);
+    captures = captures.slice(0, 12);
+    localStorage.setItem('posed-captures', JSON.stringify(captures));
+    render();
+    resumeAfterReview();
+    status.textContent = 'SAVED';
+    showEditPreview(savedCapture.src);
+    toast('Foto disimpan ke galeri.');
+    return;
   }
 
-  status.textContent = 'SAVED';
-  showEditPreview(savedCapture.src);
-  const appliedEffects = [savedCapture.faceEffect, savedCapture.colorFilter]
-    .filter((effect) => effect !== 'original')
-    .map((effect) => names[effect]);
-  toast(`${appliedEffects.join(' + ') || names.original} disimpan ke galeri.`);
+  const nextShots = [...stripShots, savedCapture];
+  if (nextShots.length < 4) {
+    stripShots = nextShots;
+    activeStripLayout = layout;
+    pendingCapture = null;
+    resumeAfterReview();
+    status.textContent = `PHOTO ${stripShots.length} / 4 SAVED`;
+    toast(`Foto ${stripShots.length} dari 4 tersimpan sementara.`);
+    return;
+  }
+
+  const saveButton = document.querySelector('#saveCapture');
+  isSavingStrip = true;
+  saveButton.disabled = true;
+  status.textContent = 'BUILDING STRIP';
+  try {
+    const completeShots = [...nextShots];
+    const stripImage = await composeStrip(completeShots, layout);
+    const savedStrip = {
+      src: stripImage,
+      faceEffect: 'strip',
+      colorFilter: 'original',
+      layout,
+      shots: completeShots
+    };
+
+    pendingCapture = null;
+    stripShots = [];
+    activeStripLayout = null;
+    captures.unshift(savedStrip);
+    captures = captures.slice(0, 12);
+    localStorage.setItem('posed-captures', JSON.stringify(captures));
+    render();
+    resumeAfterReview();
+    status.textContent = 'STRIP SAVED';
+    showEditPreview(stripImage);
+    toast(`${layout === 'grid' ? '2 × 2 photo grid' : 'Photo strip'} disimpan ke galeri.`);
+  } catch (error) {
+    status.textContent = 'STRIP ERROR';
+    toast('Strip gagal disusun. Foto terakhir tetap bisa dicoba lagi.');
+  } finally {
+    isSavingStrip = false;
+    saveButton.disabled = false;
+    updateShotProgress();
+  }
+}
+
+function resetStrip() {
+  if (!stripShots.length) return;
+  stripShots = [];
+  activeStripLayout = null;
+  updateShotProgress();
+  toast('Sesi foto dimulai ulang.');
 }
 
 function upload(event) {
@@ -1022,6 +1172,8 @@ document.querySelector('#shutter').onclick = capture;
 document.querySelector('#retakeCapture').onclick = retakeCapture;
 document.querySelector('#flipCapture').onclick = toggleCaptureFlip;
 document.querySelector('#saveCapture').onclick = saveCapture;
+document.querySelector('#resetStrip').onclick = resetStrip;
+document.querySelector('#layoutSelect').addEventListener('change', updateShotProgress);
 document.querySelector('#flipCamera').onclick = () => {
   isMirrored = !isMirrored;
   updateMirror();
@@ -1078,4 +1230,5 @@ document.onkeydown = (event) => {
 };
 
 updateMirror();
+updateShotProgress();
 render();

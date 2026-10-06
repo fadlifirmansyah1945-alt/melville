@@ -159,6 +159,43 @@
         opacity: .6;
       }
 
+      .gallery-item.gallery-strip {
+        aspect-ratio: .34;
+        background: #f4e7e6;
+      }
+
+      .gallery-item.gallery-strip img {
+        object-fit: contain;
+      }
+
+      .strip-progress[hidden] {
+        display: none;
+      }
+
+      .strip-progress {
+        min-height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+        font: 10px 'DM Mono', monospace;
+      }
+
+      .strip-progress button {
+        padding: 6px 0 6px 12px;
+        background: transparent;
+        color: var(--coral);
+        font: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      #layoutSelect:disabled {
+        opacity: .65;
+        cursor: not-allowed;
+      }
+
       @media (min-width: 801px) {
         .effects-panel .effect-grid {
           display: grid;
@@ -294,6 +331,11 @@
             </div>
           </div>
 
+          <div class="strip-progress" id="stripProgress" hidden>
+            <span id="stripProgressText"></span>
+            <button id="resetStrip" type="button">Start over ×</button>
+          </div>
+
           <div class="camera-controls">
             <label class="upload-button" for="uploadInput">↑ <span>Upload</span></label>
             <input id="uploadInput" type="file" accept="image/*" hidden>
@@ -330,9 +372,9 @@
             <div class="option-row">
               <label>Layout</label>
               <select id="layoutSelect">
-                <option>Classic strip</option>
-                <option>Single print</option>
-                <option>2 × 2 grid</option>
+                <option value="classic">Classic strip</option>
+                <option value="single">Single print</option>
+                <option value="grid">2 × 2 grid</option>
               </select>
             </div>
           </div>
