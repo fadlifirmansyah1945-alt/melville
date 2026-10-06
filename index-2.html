@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5efe7">
+    <title>FANIBOOTH — Photobooth Studio</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+      :root {
+        --paper: #f4e7e6;
+        --ink: #3b0b16;
+        --muted: #7f5660;
+        --line: #d7b8bf;
+        --coral: #8e2942;
+      }
+
+      .camera-frame {
+        background: #72263c;
+      }
+
+      .frame-wash {
+        background: linear-gradient(135deg, #fff2, transparent 46%, #24000b55);
+      }
+
+      .empty-gallery span,
+      .footer-mark {
+        color: #8e2942;
+      }
+
+      .gallery-heading {
+        border-color: #3b0b16;
+      }
+
+      .outline-button {
+        border-color: #f4e7e6;
+        color: #f4e7e6;
+      }
+
+      #canvas {
+        display: none;
+      }
+
+      #faceOverlay {
+        position: absolute;
+        z-index: 1;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .camera-meta,
+      .face-guide,
+      .camera-message {
+        z-index: 2;
+      }
+
+      .cat {
+        background: linear-gradient(135deg, #efb4a8, #f7e5d6 50%, #69414c);
+      }
+
+      .effects-panel {
+        border: 1px solid var(--line);
+        margin-bottom: 24px;
+      }
+
+      .face-effects-panel {
+        border-color: #c88b92;
+        background: #faefed;
+      }
+
+      .color-filter-panel {
+        border-color: #9aaea8;
+        background: #f1f5f3;
+      }
+
+      .face-effects-panel .effect-card.active .effect-swatch {
+        border-color: #8e2942;
+      }
+
+      .color-filter-panel .section-heading span {
+        color: #426e63;
+      }
+
+      .color-filter-panel .effect-card.active .effect-swatch {
+        border-color: #426e63;
+      }
+
+      .effects-panel .section-heading {
+        padding: 20px 22px 0;
+        margin-bottom: 12px;
+      }
+
+      .effects-panel .effect-grid {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        padding: 0 22px 18px;
+        scroll-snap-type: x mandatory;
+        scrollbar-color: var(--coral) var(--line);
+      }
+
+      .effects-panel .effect-card {
+        flex: 0 0 94px;
+        scroll-snap-align: start;
+      }
+
+      .effects-panel .effect-swatch {
+        aspect-ratio: 1.15;
+        margin-bottom: 6px;
+      }
+
+      @media (min-width: 801px) {
+        .effects-panel .effect-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+          overflow: visible;
+        }
+
+        .effects-panel .effect-card {
+          min-width: 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="topbar">
+      <a class="wordmark" href="#">FANIBOOTH<span>°</span></a>
+      <p class="top-note">your tiny photo studio</p>
+      <div class="top-actions">
+        <button class="icon-button" id="soundButton" type="button">♫</button>
+        <button class="text-button" id="aboutButton" type="button">About</button>
+      </div>
+    </header>
+
+    <main class="studio-shell">
+      <section class="intro-row">
+        <div>
+          <p class="eyebrow">CREATIVE SELF-PORTRAIT / 001</p>
+          <h1>Make a face.<br><em>Keep the moment.</em></h1>
+        </div>
+        <p class="intro-copy">A playful photobooth for your<br>best accidental angles.</p>
+      </section>
+
+      <section class="panel-section effects-panel face-effects-panel">
+        <div class="section-heading">
+          <span>01</span>
+          <h2>Face Effects</h2>
+        </div>
+
+        <div class="effect-grid" id="faceEffectGrid">
+          <button class="effect-card active" data-effect="original" type="button">
+            <i class="effect-swatch original"></i>
+            <b>Original</b>
+            <small>just you</small>
+          </button>
+          <button class="effect-card" data-effect="cat" type="button">
+            <i class="effect-swatch cat"></i>
+            <b>Cat Face</b>
+            <small>ears & whiskers</small>
+          </button>
+          <button class="effect-card" data-effect="stretch" type="button">
+            <i class="effect-swatch" style="background:linear-gradient(135deg,#eea4b6,#a5d5cb 52%,#4b5262)"></i>
+            <b>Stretch Face</b>
+            <small>long face energy</small>
+          </button>
+          <button class="effect-card" data-effect="bigEyes" type="button">
+            <i class="effect-swatch" style="background:linear-gradient(135deg,#e8b5dd,#b8daf0 52%,#e8c578)"></i>
+            <b>Big Eyes</b>
+            <small>wide-eyed wonder</small>
+          </button>
+          <button class="effect-card" data-effect="wide" type="button">
+            <i class="effect-swatch" style="background:linear-gradient(135deg,#f2b27d,#d97474 52%,#715568)"></i>
+            <b>Wide Face</b>
+            <small>cheeky stretch</small>
+          </button>
+          <button class="effect-card" data-effect="bunny" type="button">
+            <i class="effect-swatch" style="background:linear-gradient(135deg,#f3c1ca,#fff0dc 52%,#b06c7d)"></i>
+            <b>Bunny Face</b>
+            <small>long ears</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel-section effects-panel color-filter-panel">
+        <div class="section-heading">
+          <span>02</span>
+          <h2>Color Filters</h2>
+        </div>
+
+        <div class="effect-grid" id="filterGrid">
+          <button class="effect-card active" data-effect="original" type="button">
+            <i class="effect-swatch original"></i>
+            <b>Original</b>
+            <small>no color filter</small>
+          </button>
+          <button class="effect-card" data-effect="noir" type="button">
+            <i class="effect-swatch noir"></i>
+            <b>Noir</b>
+            <small>after dark</small>
+          </button>
+          <button class="effect-card" data-effect="vintage" type="button">
+            <i class="effect-swatch vintage"></i>
+            <b>Film Club</b>
+            <small>soft focus</small>
+          </button>
+          <button class="effect-card" data-effect="dreamy" type="button">
+            <i class="effect-swatch dreamy"></i>
+            <b>Dreamy</b>
+            <small>cloud nine</small>
+          </button>
+          <button class="effect-card" data-effect="pop" type="button">
+            <i class="effect-swatch pop"></i>
+            <b>Pop</b>
+            <small>loud & proud</small>
+          </button>
+          <button class="effect-card" data-effect="cool" type="button">
+            <i class="effect-swatch cool"></i>
+            <b>Cool Blue</b>
+            <small>ice ice baby</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="booth-layout">
+        <div class="camera-column">
+          <div class="camera-frame" id="cameraFrame">
+            <video id="video" autoplay playsinline muted></video>
+            <canvas id="canvas"></canvas>
+            <img id="photoPreview" alt="Hasil foto terakhir">
+            <canvas id="faceOverlay" aria-hidden="true"></canvas>
+            <div class="frame-wash"></div>
+            <div class="camera-meta">
+              <span id="cameraStatus">CAMERA READY</span>
+              <span id="shotCount">00 / 04</span>
+            </div>
+            <div class="face-guide"></div>
+            <div class="flash" id="flash"></div>
+            <div class="camera-message" id="cameraMessage">
+              <span class="camera-message-icon">◌</span>
+              <b>Camera access needed</b>
+              <small>Allow camera access to start your session</small>
+              <button class="outline-button" id="startCamera" type="button">Enable camera</button>
+            </div>
+          </div>
+
+          <div class="camera-controls">
+            <label class="upload-button" for="uploadInput">↑ <span>Upload</span></label>
+            <input id="uploadInput" type="file" accept="image/*" hidden>
+            <button class="shutter" id="shutter" type="button"><span></span></button>
+            <button class="flip-button" id="flipCamera" type="button">↔</button>
+          </div>
+
+          <p class="control-hint">press <kbd>space</kbd> to capture <span>·</span> 4 shots per strip</p>
+        </div>
+
+        <aside class="control-panel">
+          <div class="panel-section">
+            <div class="section-heading">
+              <span>03</span>
+              <h2>Set the scene</h2>
+            </div>
+
+            <div class="option-row">
+              <label>Timer</label>
+              <select id="timerSelect">
+                <option value="0">No timer</option>
+                <option value="3">3 seconds</option>
+                <option value="5">5 seconds</option>
+                <option value="10">10 seconds</option>
+              </select>
+            </div>
+
+            <div class="option-row">
+              <label>Layout</label>
+              <select id="layoutSelect">
+                <option>Classic strip</option>
+                <option>Single print</option>
+                <option>2 × 2 grid</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="panel-footer">
+            Made for little moments<br>and big expressions.
+            <span>✳</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="gallery-section">
+        <div class="gallery-heading">
+          <div>
+            <p class="eyebrow">YOUR SESSION</p>
+            <h2>Recent captures <small id="galleryCount">(0)</small></h2>
+          </div>
+          <button class="clear-button" id="clearGallery" type="button">Clear all ×</button>
+        </div>
+
+        <div class="gallery-grid" id="galleryGrid">
+          <div class="empty-gallery">
+            <span>✦</span>
+            <p>Your photos will appear here.<br>Go on, make a face.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="aboutDialog">
+      <button class="dialog-close" id="closeAbout" type="button">×</button>
+      <p class="eyebrow">ABOUT FANIBOOTH</p>
+      <h2>Stay<br>Matcha.</h2>
+      <p>ILOVEYOUFANI</p>
+      <small>Dibuat karna saya sayang Fani</small>
+    </dialog>
+
+    <div class="toast" id="toast"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
