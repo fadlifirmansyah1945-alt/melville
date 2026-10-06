@@ -791,7 +791,7 @@ function setEffect(effect, group) {
 
 function updateMirror() {
   video.style.transform = isMirrored ? 'scaleX(-1)' : 'scaleX(1)';
-  preview.style.transform = isMirrored ? 'scaleX(-1)' : 'scaleX(1)';
+  preview.style.transform = 'scaleX(1)';
   faceOverlay.style.transform = isMirrored ? 'scaleX(-1)' : 'scaleX(1)';
   document.querySelector('#flipCamera').setAttribute('aria-label', isMirrored ? 'Matikan mirror' : 'Aktifkan mirror');
 }
@@ -804,11 +804,6 @@ function source() {
   canvas.height = video.videoHeight || preview.naturalHeight || 1000;
 
   const context = canvas.getContext('2d');
-  if (isMirrored) {
-    context.translate(canvas.width, 0);
-    context.scale(-1, 1);
-  }
-
   context.filter = getComputedStyle(video).filter;
   context.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
   context.setTransform(1, 0, 0, 1, 0, 0);
@@ -821,8 +816,7 @@ function source() {
       faceLandmarks,
       sourceImage.videoWidth || sourceImage.naturalWidth,
       sourceImage.videoHeight || sourceImage.naturalHeight,
-      currentFaceEffect,
-      isMirrored
+      currentFaceEffect
     );
   }
 
@@ -830,7 +824,11 @@ function source() {
     const characterWidth = canvas.width * 0.34 * characterScale;
     const ratio = characterImage.naturalHeight / characterImage.naturalWidth;
     const characterHeight = characterWidth * ratio;
-    const characterX = canvas.width * characterPosition.x;
+    const characterX = canvas.width * (
+      isMirrored
+        ? 1 - characterPosition.x - 0.34 * characterScale
+        : characterPosition.x
+    );
     const characterY = canvas.height * characterPosition.y;
 
     context.filter = filters[currentColorFilter] || 'none';
@@ -845,10 +843,6 @@ function source() {
     const sourceWidth = sourceImage.videoWidth || sourceImage.naturalWidth;
     const sourceHeight = sourceImage.videoHeight || sourceImage.naturalHeight;
     context.save();
-    if (isMirrored) {
-      context.translate(canvas.width, 0);
-      context.scale(-1, 1);
-    }
     drawCatFace(context, canvas.width, canvas.height, faceLandmarks, sourceWidth, sourceHeight, currentFaceEffect);
     context.restore();
   }
