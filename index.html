@@ -16,13 +16,15 @@
     <header class="site-header">
       <a class="wordmark" href="#beranda" aria-label="Fira, kembali ke beranda">fira<span>.</span></a>
       <span class="header-note">PORTOFOLIO KREATIF <span>·</span> 2026</span>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Buka navigasi">
+      <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Buka navigasi">
         <span></span><span></span>
       </button>
       <nav class="site-nav" id="site-nav" aria-label="Navigasi utama">
-        <a href="#karya">Karya</a>
+        <a href="#karya">Portfolio</a>
+        <a href="#albums">Albums</a>
         <a href="#tentang">Tentang</a>
-        <a class="nav-contact" href="#kontak">Mari ngobrol <span aria-hidden="true">↗</span></a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Aktifkan tema gelap" title="Ganti tema">◐</button>
+        <button class="nav-contact" id="open-dashboard" type="button">Kelola <span aria-hidden="true">↗</span></button>
       </nav>
     </header>
 
@@ -33,7 +35,7 @@
           <h1>Membuat ide<br>terasa <em>berarti.</em></h1>
           <div class="hero-bottom">
             <p>Saya Fira. Merangkai visual, ruang digital, dan cerita dengan rasa ingin tahu serta perhatian pada detail.</p>
-            <a class="round-link" href="#karya" aria-label="Lihat karya pilihan">↓</a>
+            <div class="hero-actions"><a class="hero-cta" href="#karya">Lihat portfolio <span aria-hidden="true">↘</span></a><a class="round-link" href="#albums" aria-label="Lihat albums">↓</a></div>
           </div>
         </div>
         <div class="hero-art" aria-label="Kolase arsitektur dan warna sebagai pembuka portofolio" role="img">
@@ -55,55 +57,47 @@
             <p class="section-aside">Potongan eksplorasi visual<br>dan arah kreatif.</p>
           </div>
 
+          <div class="gallery-controls">
+            <label class="search-box"><span aria-hidden="true">⌕</span><input id="work-search" type="search" placeholder="Cari karya, album, kategori, tahun..." aria-label="Cari karya"></label>
+            <label class="sort-control">Urutkan <select id="work-sort" aria-label="Urutkan karya"><option value="newest">Terbaru</option><option value="oldest">Terlama</option><option value="title">Judul A-Z</option></select></label>
+          </div>
           <div class="work-toolbar">
-            <span class="work-count"><span id="visible-count">03</span> KARYA</span>
-            <div class="filter-list" role="group" aria-label="Filter kategori karya">
-              <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">Semua</button>
-              <button class="filter-button" type="button" data-filter="identitas" aria-pressed="false">Identitas</button>
-              <button class="filter-button" type="button" data-filter="digital" aria-pressed="false">Digital</button>
-              <button class="filter-button" type="button" data-filter="kampanye" aria-pressed="false">Kampanye</button>
-            </div>
+            <span class="work-count"><span id="visible-count">00</span> KARYA</span>
+            <div class="filter-list" id="category-filters" role="group" aria-label="Filter kategori karya"></div>
           </div>
+          <div class="album-context" id="album-context" hidden></div>
+          <div class="project-grid" id="project-grid" aria-live="polite"></div>
+          <p class="empty-state" id="work-empty" hidden>Belum ada karya yang cocok. Coba kata kunci atau filter lain.</p>
+        </div>
+      </section>
 
-          <div class="project-grid">
-            <article class="project-card reveal" data-category="identitas">
-              <a class="project-image image-coral" href="#kontak" aria-label="Diskusikan proyek identitas visual">
-                <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=85" alt="Buku catatan dan material cetak untuk eksplorasi identitas" loading="lazy">
-                <span class="image-index">A—01</span><span class="image-arrow" aria-hidden="true">↗</span>
-              </a>
-              <div class="project-info"><div><p class="project-type">EKSPLORASI IDENTITAS</p><h3>Warna, bentuk, karakter</h3></div><span class="project-year">2026</span></div>
-            </article>
-
-            <article class="project-card reveal" data-category="digital">
-              <a class="project-image image-green" href="#kontak" aria-label="Diskusikan proyek ruang digital">
-                <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1000&q=85" alt="Ruang kerja terang dengan meja dan kursi modern" loading="lazy">
-                <span class="image-index">B—02</span><span class="image-arrow" aria-hidden="true">↗</span>
-              </a>
-              <div class="project-info"><div><p class="project-type">ARAH DESAIN DIGITAL</p><h3>Ruang untuk ide baru</h3></div><span class="project-year">2025</span></div>
-            </article>
-
-            <article class="project-card reveal" data-category="kampanye">
-              <a class="project-image image-blue" href="#kontak" aria-label="Diskusikan proyek kampanye visual">
-                <img src="https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=1000&q=85" alt="Instalasi seni berwarna di sebuah ruang pamer" loading="lazy">
-                <span class="image-index">C—03</span><span class="image-arrow" aria-hidden="true">↗</span>
-              </a>
-              <div class="project-info"><div><p class="project-type">KONSEP KAMPANYE</p><h3>Ruang untuk bertemu</h3></div><span class="project-year">2025</span></div>
-            </article>
+      <section class="albums-section" id="albums">
+        <div class="page-wrap">
+          <div class="section-top">
+            <div><p class="eyebrow">02 — KOLEKSI PILIHAN</p><h2>Ide-ide dalam<br><em>ruangnya sendiri.</em></h2></div>
+            <button class="outline-action" type="button" data-action="add-album">+ Tambah album</button>
           </div>
+          <div class="album-grid" id="album-grid"></div>
+          <p class="empty-state" id="album-empty" hidden>Album masih kosong. Buat album pertama untuk mulai mengarsipkan karya.</p>
         </div>
       </section>
 
       <section class="about-section" id="tentang">
         <div class="page-wrap about-grid">
-          <p class="eyebrow">02 — SEDIKIT TENTANG SAYA</p>
+          <p class="eyebrow">03 — SEDIKIT TENTANG SAYA</p>
           <div class="about-copy">
             <h2>Rasa ingin tahu<br>adalah <em>cara kerja.</em></h2>
+            <div class="about-profile">
+              <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=240&h=280&q=85" alt="Foto profil Fira" loading="lazy">
+              <div><strong>Fira</strong><span>Mahasiswa · Desain Visual</span><span>Pendidikan: isi nama kampus atau sekolah</span></div>
+            </div>
             <div class="about-detail">
               <p>Saya suka menemukan benang merah antara ide yang baik dan bentuk yang tepat. Dari identitas visual sampai pengalaman digital, saya percaya detail kecil bisa membuat sesuatu terasa dekat dan mudah diingat.</p>
-              <div class="skill-list" aria-label="Bidang yang saya kerjakan">
-                <span>Identitas visual</span><span>Desain digital</span><span>Arah kreatif</span><span>Eksplorasi ide</span>
+              <div class="skill-list" aria-label="Keahlian dan software">
+                <span>Identitas visual</span><span>Desain digital</span><span>Arah kreatif</span><span>Eksplorasi ide</span><span>Adobe Illustrator</span><span>Photoshop</span><span>Figma</span>
               </div>
             </div>
+            <div class="about-socials" aria-label="Media sosial"><span>MENEMUKAN SAYA</span><a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="https://www.behance.net/" target="_blank" rel="noopener noreferrer">Behance ↗</a><a href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div>
           </div>
           <div class="about-mark" aria-hidden="true"><span>F</span><i>✳</i><small>SELALU DALAM PROSES</small></div>
         </div>
@@ -111,10 +105,11 @@
 
       <section class="contact-section" id="kontak">
         <div class="page-wrap contact-inner">
-          <p class="eyebrow">03 — PUNYA IDE?</p>
+          <p class="eyebrow">04 — PUNYA IDE?</p>
           <h2>Yuk, bikin sesuatu<br><em>yang berkesan.</em></h2>
           <a class="contact-link" href="mailto:emailkamu@example.com?subject=Kolaborasi%20kreatif">Mulai percakapan <span aria-hidden="true">↗</span></a>
           <p class="contact-note">Terbuka untuk obrolan dan kolaborasi baru.</p>
+          <div class="contact-channels" aria-label="Saluran kontak"><a href="mailto:emailkamu@example.com">Email</a><a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://wa.me/" target="_blank" rel="noopener noreferrer">WhatsApp</a><a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub</a></div>
         </div>
         <div class="contact-decoration" aria-hidden="true">F.</div>
       </section>
@@ -125,5 +120,47 @@
       <span>DIBUAT DENGAN PENUH PERHATIAN <b>✳</b></span>
       <a href="#beranda">KEMBALI KE ATAS ↑</a>
     </footer>
+
+    <dialog class="app-dialog" id="album-dialog">
+      <form class="dialog-form" id="album-form">
+        <div class="dialog-heading"><div><p class="eyebrow">KOLEKSI PORTFOLIO</p><h2 id="album-form-title">Album baru</h2></div><button class="icon-close" type="button" data-close aria-label="Tutup">×</button></div>
+        <input type="hidden" name="id">
+        <label>Nama album<input name="name" required maxlength="70" placeholder="Contoh: Desain Poster 2026"></label>
+        <label>Deskripsi<textarea name="description" rows="3" maxlength="240" placeholder="Ceritakan isi koleksi ini"></textarea></label>
+        <label>Kategori<input name="category" required maxlength="40" placeholder="Contoh: Desain Grafis"></label>
+        <label>Cover album<input name="coverFile" type="file" accept="image/*"><small class="field-hint">Pilih gambar dari perangkat, atau biarkan kosong untuk memakai cover karya pertama.</small></label>
+        <div class="dialog-actions"><button class="text-action" type="button" data-close>Batal</button><button class="solid-action" type="submit">Simpan album</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="app-dialog" id="work-dialog">
+      <form class="dialog-form" id="work-form">
+        <div class="dialog-heading"><div><p class="eyebrow">ARSIP KARYA</p><h2 id="work-form-title">Karya baru</h2></div><button class="icon-close" type="button" data-close aria-label="Tutup">×</button></div>
+        <input type="hidden" name="id">
+        <label>Album<select name="albumId" required></select></label>
+        <label>Judul karya<input name="title" required maxlength="90" placeholder="Nama karya"></label>
+        <label>Deskripsi<textarea name="description" rows="3" maxlength="320" placeholder="Konteks singkat karya"></textarea></label>
+        <label>Gambar karya<input name="imageFile" type="file" accept="image/*"><small class="field-hint">JPG, PNG, atau WebP. Gambar akan dioptimalkan di browser.</small></label>
+        <div class="form-row"><label>Kategori<input name="category" required maxlength="40" placeholder="Poster"></label><label>Tahun<input name="year" type="number" min="1900" max="2100" required></label></div>
+        <label>Software / tools<input name="tools" maxlength="100" placeholder="Photoshop, Figma..."></label>
+        <label>Link project<input name="projectUrl" type="url" placeholder="https://..."></label>
+        <label>Link lainnya<input name="socialUrl" type="url" placeholder="Behance, Instagram, GitHub..."></label>
+        <label class="check-label"><input name="featured" type="checkbox"> Tampilkan sebagai karya pilihan</label>
+        <div class="dialog-actions"><button class="text-action" type="button" data-close>Batal</button><button class="solid-action" type="submit">Simpan karya</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="app-dialog dashboard-dialog" id="dashboard-dialog">
+      <section class="dashboard-content">
+        <div class="dialog-heading"><div><p class="eyebrow">RUANG KERJA</p><h2>Dashboard</h2></div><button class="icon-close" type="button" data-close aria-label="Tutup">×</button></div>
+        <div class="dashboard-stats" id="dashboard-stats"></div>
+        <div class="dashboard-tools"><button class="solid-action" type="button" data-action="add-album">+ Album</button><button class="outline-action" type="button" data-action="add-work">+ Karya</button></div>
+        <div class="dashboard-list" id="dashboard-list"></div>
+      </section>
+    </dialog>
+
+    <dialog class="app-dialog detail-dialog" id="detail-dialog">
+      <div id="detail-content"></div>
+    </dialog>
   </body>
 </html>
