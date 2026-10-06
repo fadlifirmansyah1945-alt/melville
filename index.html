@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f1f2e9">
+    <meta name="description" content="Portofolio kreatif Fira: identitas visual, desain digital, dan cerita yang dibuat dengan perhatian pada detail.">
+    <title>Fira — Portofolio Kreatif</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio.css">
+    <script src="portfolio.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="wordmark" href="#beranda" aria-label="Fira, kembali ke beranda">fira<span>.</span></a>
+      <span class="header-note">PORTOFOLIO KREATIF <span>·</span> 2026</span>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Buka navigasi">
+        <span></span><span></span>
+      </button>
+      <nav class="site-nav" id="site-nav" aria-label="Navigasi utama">
+        <a href="#karya">Karya</a>
+        <a href="#tentang">Tentang</a>
+        <a class="nav-contact" href="#kontak">Mari ngobrol <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero page-wrap" id="beranda">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-dot"></span> DESAIN VISUAL · CERITA DIGITAL</p>
+          <h1>Membuat ide<br>terasa <em>berarti.</em></h1>
+          <div class="hero-bottom">
+            <p>Saya Fira. Merangkai visual, ruang digital, dan cerita dengan rasa ingin tahu serta perhatian pada detail.</p>
+            <a class="round-link" href="#karya" aria-label="Lihat karya pilihan">↓</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-label="Kolase arsitektur dan warna sebagai pembuka portofolio" role="img">
+          <img class="hero-photo" src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=85" alt="Detail arsitektur modern dengan garis dan bayangan" fetchpriority="high">
+          <div class="hero-sticker"><span>IDE<br>JADI<br><i>RASA</i></span><b aria-hidden="true">✳</b></div>
+          <span class="art-caption">CATATAN VISUAL NO. 01</span>
+          <span class="art-index">01 / 03</span>
+        </div>
+        <div class="hero-side-note" aria-hidden="true">BERPIKIR · MEMBUAT · MENGULANG</div>
+      </section>
+
+      <section class="work-section" id="karya">
+        <div class="page-wrap">
+          <div class="section-top">
+            <div>
+              <p class="eyebrow">01 — PILIHAN KARYA</p>
+              <h2>Yang sedang<br><em>ada di kepala.</em></h2>
+            </div>
+            <p class="section-aside">Potongan eksplorasi visual<br>dan arah kreatif.</p>
+          </div>
+
+          <div class="work-toolbar">
+            <span class="work-count"><span id="visible-count">03</span> KARYA</span>
+            <div class="filter-list" role="group" aria-label="Filter kategori karya">
+              <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">Semua</button>
+              <button class="filter-button" type="button" data-filter="identitas" aria-pressed="false">Identitas</button>
+              <button class="filter-button" type="button" data-filter="digital" aria-pressed="false">Digital</button>
+              <button class="filter-button" type="button" data-filter="kampanye" aria-pressed="false">Kampanye</button>
+            </div>
+          </div>
+
+          <div class="project-grid">
+            <article class="project-card reveal" data-category="identitas">
+              <a class="project-image image-coral" href="#kontak" aria-label="Diskusikan proyek identitas visual">
+                <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=85" alt="Buku catatan dan material cetak untuk eksplorasi identitas" loading="lazy">
+                <span class="image-index">A—01</span><span class="image-arrow" aria-hidden="true">↗</span>
+              </a>
+              <div class="project-info"><div><p class="project-type">EKSPLORASI IDENTITAS</p><h3>Warna, bentuk, karakter</h3></div><span class="project-year">2026</span></div>
+            </article>
+
+            <article class="project-card reveal" data-category="digital">
+              <a class="project-image image-green" href="#kontak" aria-label="Diskusikan proyek ruang digital">
+                <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1000&q=85" alt="Ruang kerja terang dengan meja dan kursi modern" loading="lazy">
+                <span class="image-index">B—02</span><span class="image-arrow" aria-hidden="true">↗</span>
+              </a>
+              <div class="project-info"><div><p class="project-type">ARAH DESAIN DIGITAL</p><h3>Ruang untuk ide baru</h3></div><span class="project-year">2025</span></div>
+            </article>
+
+            <article class="project-card reveal" data-category="kampanye">
+              <a class="project-image image-blue" href="#kontak" aria-label="Diskusikan proyek kampanye visual">
+                <img src="https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=1000&q=85" alt="Instalasi seni berwarna di sebuah ruang pamer" loading="lazy">
+                <span class="image-index">C—03</span><span class="image-arrow" aria-hidden="true">↗</span>
+              </a>
+              <div class="project-info"><div><p class="project-type">KONSEP KAMPANYE</p><h3>Ruang untuk bertemu</h3></div><span class="project-year">2025</span></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="about-section" id="tentang">
+        <div class="page-wrap about-grid">
+          <p class="eyebrow">02 — SEDIKIT TENTANG SAYA</p>
+          <div class="about-copy">
+            <h2>Rasa ingin tahu<br>adalah <em>cara kerja.</em></h2>
+            <div class="about-detail">
+              <p>Saya suka menemukan benang merah antara ide yang baik dan bentuk yang tepat. Dari identitas visual sampai pengalaman digital, saya percaya detail kecil bisa membuat sesuatu terasa dekat dan mudah diingat.</p>
+              <div class="skill-list" aria-label="Bidang yang saya kerjakan">
+                <span>Identitas visual</span><span>Desain digital</span><span>Arah kreatif</span><span>Eksplorasi ide</span>
+              </div>
+            </div>
+          </div>
+          <div class="about-mark" aria-hidden="true"><span>F</span><i>✳</i><small>SELALU DALAM PROSES</small></div>
+        </div>
+      </section>
+
+      <section class="contact-section" id="kontak">
+        <div class="page-wrap contact-inner">
+          <p class="eyebrow">03 — PUNYA IDE?</p>
+          <h2>Yuk, bikin sesuatu<br><em>yang berkesan.</em></h2>
+          <a class="contact-link" href="mailto:emailkamu@example.com?subject=Kolaborasi%20kreatif">Mulai percakapan <span aria-hidden="true">↗</span></a>
+          <p class="contact-note">Terbuka untuk obrolan dan kolaborasi baru.</p>
+        </div>
+        <div class="contact-decoration" aria-hidden="true">F.</div>
+      </section>
+    </main>
+
+    <footer class="site-footer page-wrap">
+      <a class="wordmark" href="#beranda">fira<span>.</span></a>
+      <span>DIBUAT DENGAN PENUH PERHATIAN <b>✳</b></span>
+      <a href="#beranda">KEMBALI KE ATAS ↑</a>
+    </footer>
+  </body>
+</html>
