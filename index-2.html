@@ -116,6 +116,38 @@
         margin-bottom: 6px;
       }
 
+      .camera-frame.has-photo #faceOverlay,
+      .camera-frame.has-photo .face-guide,
+      .camera-frame.has-photo .frame-wash {
+        display: none;
+      }
+
+      .camera-controls[hidden],
+      .capture-review-controls[hidden] {
+        display: none;
+      }
+
+      .capture-review-controls {
+        min-height: 88px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .capture-review-controls button {
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid var(--ink);
+        background: transparent;
+        font: 11px 'DM Mono', monospace;
+      }
+
+      .capture-review-controls #saveCapture {
+        color: #fff;
+        background: var(--ink);
+      }
+
       @media (min-width: 801px) {
         .effects-panel .effect-grid {
           display: grid;
@@ -256,6 +288,11 @@
             <input id="uploadInput" type="file" accept="image/*" hidden>
             <button class="shutter" id="shutter" type="button"><span></span></button>
             <button class="flip-button" id="flipCamera" type="button">↔</button>
+          </div>
+
+          <div class="capture-review-controls" id="captureReviewControls" hidden>
+            <button id="retakeCapture" type="button">↻ Retake</button>
+            <button id="saveCapture" type="button">↓ Save to gallery</button>
           </div>
 
           <p class="control-hint">press <kbd>space</kbd> to capture <span>·</span> 4 shots per strip</p>

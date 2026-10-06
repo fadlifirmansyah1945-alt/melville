@@ -42,6 +42,7 @@ let facingMode = 'user';
 let isMirrored = true;
 let currentFaceEffect = 'original';
 let currentColorFilter = 'original';
+let pendingCapture = null;
 let faceLandmarker = null;
 let faceLandmarkerPromise = null;
 let faceLandmarks = null;
@@ -694,6 +695,7 @@ function drawFaceOverlay() {
   }
   const context = faceOverlay.getContext('2d', { willReadFrequently: true });
   context.clearRect(0, 0, faceOverlay.width, faceOverlay.height);
+  if (frame.classList.contains('has-photo')) return;
   context.filter = filters[currentColorFilter] || 'none';
   if (faceLandmarks && video.videoWidth && ['cat', 'bunny'].includes(currentFaceEffect)) {
     drawCatFace(
@@ -733,7 +735,7 @@ function startFaceTracking() {
   if (faceTrackingFrame || !faceEffects.has(currentFaceEffect) || !video.srcObject || !faceLandmarker) return;
 
   const track = () => {
-    if (!faceEffects.has(currentFaceEffect) || !video.srcObject) {
+    if (!faceEffects.has(currentFaceEffect) || !video.srcObject || pendingCapture || frame.classList.contains('has-photo')) {
       faceTrackingFrame = 0;
       clearFaceOverlay();
       return;
@@ -753,7 +755,8 @@ function startFaceTracking() {
 function updateEffectPresentation() {
   const colorFilter = filters[currentColorFilter] || 'none';
   video.className = preview.className = `effect-${currentFaceEffect} effect-${currentColorFilter}`;
-  video.style.filter = preview.style.filter = colorFilter;
+  video.style.filter = colorFilter;
+  preview.style.filter = frame.classList.contains('has-photo') ? 'none' : colorFilter;
   characterPreview.style.filter = colorFilter;
   const activeNames = [currentFaceEffect, currentColorFilter]
     .filter((effect) => effect !== 'original')
@@ -854,6 +857,8 @@ function source() {
 }
 
 function capture() {
+  if (pendingCapture) return;
+
   const timer = Number(document.querySelector('#timerSelect').value);
   if (!video.srcObject && !preview.src) {
     toast('Aktifkan kamera atau upload foto dulu.');
@@ -884,23 +889,68 @@ function take() {
   const src = source();
   if (!src) return;
 
+  pendingCapture = {
+    src,
+    faceEffect: currentFaceEffect,
+    colorFilter: currentColorFilter
+  };
   preview.src = src;
-  showEditPreview(src);
+  preview.style.filter = 'none';
+  frame.classList.add('has-photo');
+  document.querySelector('.camera-controls').hidden = true;
+  document.querySelector('#captureReviewControls').hidden = false;
 
   const flash = document.querySelector('#flash');
   flash.classList.remove('active');
   void flash.offsetWidth;
   flash.classList.add('active');
 
-  captures.unshift({ src, faceEffect: currentFaceEffect, colorFilter: currentColorFilter });
+  status.textContent = 'REVIEW PHOTO';
+  toast('Foto siap ditinjau. Retake atau simpan ke galeri.');
+}
+
+function retakeCapture() {
+  if (!pendingCapture) return;
+
+  pendingCapture = null;
+  frame.classList.remove('has-photo');
+  preview.removeAttribute('src');
+  document.querySelector('.camera-controls').hidden = false;
+  document.querySelector('#captureReviewControls').hidden = true;
+  message.classList.toggle('hidden', Boolean(video.srcObject));
+  updateEffectPresentation();
+
+  if (faceEffects.has(currentFaceEffect) && video.srcObject) {
+    ensureFaceLandmarker().then(startFaceTracking).catch(() => {
+      toast('Pelacakan wajah tidak dapat dimulai ulang.');
+    });
+  }
+}
+
+function saveCapture() {
+  if (!pendingCapture) return;
+
+  const savedCapture = pendingCapture;
+  pendingCapture = null;
+  captures.unshift(savedCapture);
   captures = captures.slice(0, 12);
   localStorage.setItem('posed-captures', JSON.stringify(captures));
   render();
-  status.textContent = 'CAPTURED';
-  const appliedEffects = [currentFaceEffect, currentColorFilter]
+  document.querySelector('#captureReviewControls').hidden = true;
+  document.querySelector('.camera-controls').hidden = false;
+
+  if (video.srcObject) {
+    frame.classList.remove('has-photo');
+    preview.removeAttribute('src');
+    if (faceEffects.has(currentFaceEffect)) startFaceTracking();
+  }
+
+  status.textContent = 'SAVED';
+  showEditPreview(savedCapture.src);
+  const appliedEffects = [savedCapture.faceEffect, savedCapture.colorFilter]
     .filter((effect) => effect !== 'original')
     .map((effect) => names[effect]);
-  toast(`${appliedEffects.join(' + ') || names.original} captured.`);
+  toast(`${appliedEffects.join(' + ') || names.original} disimpan ke galeri.`);
 }
 
 function upload(event) {
@@ -919,6 +969,8 @@ function upload(event) {
 
 document.querySelector('#startCamera').onclick = startCamera;
 document.querySelector('#shutter').onclick = capture;
+document.querySelector('#retakeCapture').onclick = retakeCapture;
+document.querySelector('#saveCapture').onclick = saveCapture;
 document.querySelector('#flipCamera').onclick = () => {
   isMirrored = !isMirrored;
   updateMirror();
@@ -968,7 +1020,7 @@ document.querySelector('#closeAbout').onclick = () => document.querySelector('#a
 editDownloadButton.onclick = saveEditedPreview;
 
 document.onkeydown = (event) => {
-  if (event.code === 'Space' && event.target.tagName !== 'SELECT') {
+  if (event.code === 'Space' && event.target.tagName !== 'SELECT' && !pendingCapture) {
     event.preventDefault();
     capture();
   }
