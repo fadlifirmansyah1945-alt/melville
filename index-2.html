@@ -130,6 +130,7 @@
       .capture-review-controls {
         min-height: 88px;
         display: flex;
+        flex-wrap: wrap;
         justify-content: center;
         align-items: center;
         gap: 14px;
@@ -146,6 +147,16 @@
       .capture-review-controls #saveCapture {
         color: #fff;
         background: var(--ink);
+      }
+
+      .capture-review-controls #flipCapture[aria-pressed="true"] {
+        border-color: var(--coral);
+        background: #ef735c22;
+      }
+
+      .capture-review-controls button:disabled {
+        cursor: wait;
+        opacity: .6;
       }
 
       @media (min-width: 801px) {
@@ -292,6 +303,7 @@
 
           <div class="capture-review-controls" id="captureReviewControls" hidden>
             <button id="retakeCapture" type="button">↻ Retake</button>
+            <button id="flipCapture" type="button" aria-pressed="false">↔ Flip photo</button>
             <button id="saveCapture" type="button">↓ Save to gallery</button>
           </div>
 

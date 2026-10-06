@@ -43,6 +43,7 @@ let isMirrored = true;
 let currentFaceEffect = 'original';
 let currentColorFilter = 'original';
 let pendingCapture = null;
+let isFlippingCapture = false;
 let faceLandmarker = null;
 let faceLandmarkerPromise = null;
 let faceLandmarks = null;
@@ -885,11 +886,14 @@ function take() {
 
   pendingCapture = {
     src,
+    originalSrc: src,
+    flipped: false,
     faceEffect: currentFaceEffect,
     colorFilter: currentColorFilter
   };
   preview.src = src;
   preview.style.filter = 'none';
+  document.querySelector('#flipCapture').setAttribute('aria-pressed', 'false');
   frame.classList.add('has-photo');
   document.querySelector('.camera-controls').hidden = true;
   document.querySelector('#captureReviewControls').hidden = false;
@@ -904,9 +908,10 @@ function take() {
 }
 
 function retakeCapture() {
-  if (!pendingCapture) return;
+  if (!pendingCapture || isFlippingCapture) return;
 
   pendingCapture = null;
+  document.querySelector('#flipCapture').setAttribute('aria-pressed', 'false');
   frame.classList.remove('has-photo');
   preview.removeAttribute('src');
   document.querySelector('.camera-controls').hidden = false;
@@ -921,10 +926,61 @@ function retakeCapture() {
   }
 }
 
-function saveCapture() {
-  if (!pendingCapture) return;
+async function toggleCaptureFlip() {
+  if (!pendingCapture || isFlippingCapture) return;
 
-  const savedCapture = pendingCapture;
+  const flipButton = document.querySelector('#flipCapture');
+  if (pendingCapture.flipped) {
+    pendingCapture.src = pendingCapture.originalSrc;
+    pendingCapture.flipped = false;
+    preview.src = pendingCapture.src;
+    flipButton.setAttribute('aria-pressed', 'false');
+    status.textContent = 'REVIEW PHOTO';
+    toast('Orientasi foto dikembalikan.');
+    return;
+  }
+
+  isFlippingCapture = true;
+  flipButton.disabled = true;
+  try {
+    const image = new Image();
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = reject;
+      image.src = pendingCapture.originalSrc;
+    });
+
+    const flipCanvas = document.createElement('canvas');
+    flipCanvas.width = image.naturalWidth;
+    flipCanvas.height = image.naturalHeight;
+    const context = flipCanvas.getContext('2d');
+    context.translate(flipCanvas.width, 0);
+    context.scale(-1, 1);
+    context.drawImage(image, 0, 0);
+
+    pendingCapture.src = flipCanvas.toDataURL('image/jpeg', 0.9);
+    pendingCapture.flipped = true;
+    preview.src = pendingCapture.src;
+    flipButton.setAttribute('aria-pressed', 'true');
+    status.textContent = 'PHOTO FLIPPED';
+    toast('Foto dibalik. Tekan lagi untuk mengembalikan.');
+  } catch (error) {
+    toast('Foto tidak dapat dibalik. Coba lagi.');
+  } finally {
+    isFlippingCapture = false;
+    flipButton.disabled = false;
+  }
+}
+
+function saveCapture() {
+  if (!pendingCapture || isFlippingCapture) return;
+
+  const savedCapture = {
+    src: pendingCapture.src,
+    faceEffect: pendingCapture.faceEffect,
+    colorFilter: pendingCapture.colorFilter,
+    flipped: pendingCapture.flipped
+  };
   pendingCapture = null;
   captures.unshift(savedCapture);
   captures = captures.slice(0, 12);
@@ -964,6 +1020,7 @@ function upload(event) {
 document.querySelector('#startCamera').onclick = startCamera;
 document.querySelector('#shutter').onclick = capture;
 document.querySelector('#retakeCapture').onclick = retakeCapture;
+document.querySelector('#flipCapture').onclick = toggleCaptureFlip;
 document.querySelector('#saveCapture').onclick = saveCapture;
 document.querySelector('#flipCamera').onclick = () => {
   isMirrored = !isMirrored;
